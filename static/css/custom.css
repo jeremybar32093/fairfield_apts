@@ -1,0 +1,11 @@
+.virtual-tour-image:hover {
+    /* width:1000px;
+    height:1000px; */
+    transform: scale(2);
+    z-index: 2;
+}
+
+.figure-caption {
+    color: white;
+    background-color: #343a40;
+}
