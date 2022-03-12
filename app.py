@@ -18,7 +18,7 @@ from flask_mail import Mail, Message
 # from config import mail_username, mail_password
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
-from config import mail_username, mail_password
+from config import mail_username, mail_password, postgres_secret_key, postgres_un
 
 #################################################
 # Flask Setup
@@ -26,10 +26,10 @@ from config import mail_username, mail_password
 app = Flask(__name__)
 
 # ***** CREATE DATABASE FOR STORING RATES/APT TYPES/TENANT INFO/ETC ****+*
-# app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/medicine_without"
-# # Secret Key for being able to post back to database
-# app.config["SECRET_KEY"] = "$MedicineWithout2021$"
-# # SMTP Mail Server - outlook
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/fairfield_apt"
+# Secret Key for being able to post back to database
+app.config["SECRET_KEY"] = postgres_secret_key
+# SMTP Mail Server - outlook
 app.config["MAIL_SERVER"] = "smtp-mail.outlook.com"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
@@ -38,51 +38,53 @@ app.config["MAIL_USERNAME"] = mail_username
 app.config["MAIL_PASSWORD"] = mail_password
 # app.config["MAIL_SUPPRESS_SEND"] = False
 
-# # Create db object
-# db = SQLAlchemy(app)
-# # Create admin page object
-# admin = Admin(app)
+# Create db object
+db = SQLAlchemy(app)
+# Create admin page object
+admin = Admin(app)
 # Create mail object
 mail = Mail(app)
 
 #################################################
 # Database tables via classes
 #################################################
-# class CKTextAreaWidget(TextArea):
-#     def __call__(self, field, **kwargs):
-#         if kwargs.get('class'):
-#             kwargs['class'] += ' ckeditor'
-#         else:
-#             kwargs.setdefault('class', 'ckeditor')
-#         return super(CKTextAreaWidget, self).__call__(field, **kwargs)
+class CKTextAreaWidget(TextArea):
+    def __call__(self, field, **kwargs):
+        if kwargs.get('class'):
+            kwargs['class'] += ' ckeditor'
+        else:
+            kwargs.setdefault('class', 'ckeditor')
+        return super(CKTextAreaWidget, self).__call__(field, **kwargs)
 
-# class CKTextAreaField(TextAreaField):
-#     widget = CKTextAreaWidget()
+class CKTextAreaField(TextAreaField):
+    widget = CKTextAreaWidget()
 
-# class Posts(db.Model):
-#     id = db.Column(db.Integer, primary_key = True)
-#     title = db.Column(db.String(255))
-#     subtitle = db.Column(db.String(255))
-#     category = db.Column(db.String(255))
-#     subcategory = db.Column(db.String(255))
-#     content = db.Column(db.Text)
-#     author = db.Column(db.String(255))
-#     date_posted = db.Column(db.DateTime)
-#     slug = db.Column(db.String(255))
+class Listings(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    unit_number = db.Column(db.String(255))
+    floor_number = db.Column(db.String(255))
+    bedrooms = db.Column(db.String(255))
+    bathrooms = db.Column(db.String(255))
+    square_footage = db.Column(db.String(255))
+    available_date = db.Column(db.Date)
+    monthly_rent = db.Column(db.String(255))
+    min_credit_score = db.Column(db.String(255))
+    pets_allowed = db.Column(db.String(255))
+    notes = db.Column(db.Text)
+    
+# admin view that contains login 
+class SecureModelView(ModelView):
+    # Override is_accesible method - within module, simply returns true by default
+    def is_accessible(self):
+        if "logged_in" in session:
+            return True
+        else:
+            abort(403)
+    extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
 
-# # admin view that contains login 
-# class SecureModelView(ModelView):
-#     # Override is_accesible method - within module, simply returns true by default
-#     def is_accessible(self):
-#         if "logged_in" in session:
-#             return True
-#         else:
-#             abort(403)
-#     extra_js = ['//cdn.ckeditor.com/4.6.0/standard/ckeditor.js']
-
-#     form_overrides = {
-#         'content': CKTextAreaField
-#     }
+    form_overrides = {
+        'notes': CKTextAreaField
+    }
 
 #     form_choices = {
 #     'category': [
@@ -99,8 +101,8 @@ mail = Mail(app)
 #     }
          
 
-# # Model View for posts class
-# admin.add_view(SecureModelView(Posts, db.session))
+# Model View for posts class
+admin.add_view(SecureModelView(Listings, db.session))
 
 
 #################################################
@@ -142,12 +144,33 @@ def forms():
 # Rentals page route
 @app.route("/rentals")
 def rentals():
-    return render_template("rentals.html")
+    # List all posts on homepage list
+    listings = Listings.query.order_by(Listings.available_date.desc())
+    return render_template("rentals.html", listings=listings)
 
 # Virtual tour page route
 @app.route("/virtual-tour")
 def virtual_tour():
     return render_template("virtual_tour.html")
+
+# Login page
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        # Right now, handles only 1 user (admin user)
+        # ***** FUTURE ENHANCEMENT - ADD ABILITY FOR MULTIPLE USER SIGNUP *****
+        if request.form.get("username") == postgres_un and request.form.get("password") == postgres_secret_key:
+            session['logged_in'] = True
+            return redirect("/admin")
+        else:
+            return render_template("login.html", failed=True)
+    return render_template("login.html")
+
+# Logout page
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/")
 
 
 #################################################
