@@ -18,6 +18,7 @@ from flask_mail import Mail, Message
 # from config import mail_username, mail_password
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
+from config import mail_username, mail_password
 
 #################################################
 # Flask Setup
@@ -29,20 +30,20 @@ app = Flask(__name__)
 # # Secret Key for being able to post back to database
 # app.config["SECRET_KEY"] = "$MedicineWithout2021$"
 # # SMTP Mail Server - outlook
-# app.config["MAIL_SERVER"] = "smtp-mail.outlook.com"
-# app.config["MAIL_PORT"] = 587
-# app.config["MAIL_USE_TLS"] = True
-# app.config["MAIL_USE_SSL"] = False
-# app.config["MAIL_USERNAME"] = mail_username
-# app.config["MAIL_PASSWORD"] = mail_password
-# # app.config["MAIL_SUPPRESS_SEND"] = False
+app.config["MAIL_SERVER"] = "smtp-mail.outlook.com"
+app.config["MAIL_PORT"] = 587
+app.config["MAIL_USE_TLS"] = True
+app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USERNAME"] = mail_username
+app.config["MAIL_PASSWORD"] = mail_password
+# app.config["MAIL_SUPPRESS_SEND"] = False
 
 # # Create db object
 # db = SQLAlchemy(app)
 # # Create admin page object
 # admin = Admin(app)
-# # Create mail object
-# mail = Mail(app)
+# Create mail object
+mail = Mail(app)
 
 #################################################
 # Database tables via classes
@@ -117,8 +118,20 @@ def about():
     return render_template("about.html")
 
 # Contact page route
-@app.route("/contact")
+@app.route("/contact", methods=["GET","POST"])
 def contact():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        phone = request.form.get("phone")
+        message = request.form.get("message")
+        email_body = f"Name: {name}\nE-mail: {email}\nPhone: {phone}\n\n\n{message}"
+
+        msg = Message(subject=f"Mail from {name}", body=email_body, sender=mail_username, recipients=["jeremybar32093@gmail.com"])
+        mail.send(msg)
+        print(name)
+        return render_template("contact.html", success=True)
+
     return render_template("contact.html")
 
 # Forms page route
