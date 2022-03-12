@@ -124,7 +124,7 @@ def contact():
 # Forms page route
 @app.route("/forms")
 def forms():
-    return render_template("contact.html")
+    return render_template("forms.html")
 
 # Rentals page route
 @app.route("/rentals")
