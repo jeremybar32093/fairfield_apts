@@ -18,7 +18,7 @@ from flask_mail import Mail, Message
 # from config import mail_username, mail_password
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
-from config import mail_username, mail_password, postgres_secret_key, postgres_un
+from config import mail_username, mail_password, postgres_secret_key, postgres_un, contact_email
 
 #################################################
 # Flask Setup
@@ -129,7 +129,7 @@ def contact():
         message = request.form.get("message")
         email_body = f"Name: {name}\nE-mail: {email}\nPhone: {phone}\n\n\n{message}"
 
-        msg = Message(subject=f"Mail from {name}", body=email_body, sender=mail_username, recipients=["jeremybar32093@gmail.com"])
+        msg = Message(subject=f"Mail from {name}", body=email_body, sender=mail_username, recipients=[contact_email])
         mail.send(msg)
         print(name)
         return render_template("contact.html", success=True)
