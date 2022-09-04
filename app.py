@@ -153,6 +153,11 @@ def rentals():
 def virtual_tour():
     return render_template("virtual_tour.html")
 
+# Floorplans page route
+@app.route("/floorplans")
+def floorplans():
+    return render_template("floorplans.html")
+
 # Login page
 @app.route("/login", methods=["GET", "POST"])
 def login():
