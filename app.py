@@ -145,7 +145,7 @@ def forms():
 @app.route("/rentals")
 def rentals():
     # List all posts on homepage list
-    listings = Listings.query.order_by(Listings.available_date.asc())
+    listings = Listings.query.filter_by(available_flag='yes').order_by(Listings.available_date.asc())
     return render_template("rentals.html", listings=listings)
 
 # Virtual tour page route
