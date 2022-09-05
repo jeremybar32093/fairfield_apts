@@ -48,8 +48,6 @@
                         <th>Square Footage</th>
                         <th>Availabile On</th>
                         <th>Monthly Rent</th>
-                        <th>Minimum Credit Score</th>
-                        <th>Pets Allowed</th>
                         <th>Additional Notes</th>
                     </tr>
                     {% for listing in listings %}
@@ -61,8 +59,6 @@
                         <td>{{listing.square_footage}}</td>
                         <td>{{listing.available_date}}</td>
                         <td>{{listing.monthly_rent}}</td>
-                        <td>{{listing.min_credit_score}}</td>
-                        <td>{{listing.pets_allowed}}</td>
                         <td>{{listing.notes|safe}}</td>
                     </tr>
                     {% endfor %}
