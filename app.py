@@ -18,7 +18,7 @@ from flask_mail import Mail, Message
 # from config import mail_username, mail_password
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
-from config import mail_username, mail_password, postgres_secret_key, postgres_un, contact_email
+from config import mail_username, mail_password, postgres_secret_key, postgres_un, contact_email, admin_un, admin_pw
 
 #################################################
 # Flask Setup
@@ -26,7 +26,8 @@ from config import mail_username, mail_password, postgres_secret_key, postgres_u
 app = Flask(__name__)
 
 # ***** CREATE DATABASE FOR STORING RATES/APT TYPES/TENANT INFO/ETC ****+*
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgresql://postgres:postgres@localhost:5432/fairfield_apt"
+app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://iujsffuonhvyhz:ce70dad91ade8c823e1124820ab3061924686948f85918d1311168e15ac86cf3@ec2-35-168-122-84.compute-1.amazonaws.com:5432/d54e2uu2bmvg8r"
+#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 # Secret Key for being able to post back to database
 app.config["SECRET_KEY"] = postgres_secret_key
 # SMTP Mail Server - outlook
@@ -66,10 +67,11 @@ class Listings(db.Model):
     bedrooms = db.Column(db.String(255))
     bathrooms = db.Column(db.String(255))
     square_footage = db.Column(db.String(255))
+    available_flag = db.Column(db.String(255))
     available_date = db.Column(db.Date)
     monthly_rent = db.Column(db.String(255))
     min_credit_score = db.Column(db.String(255))
-    pets_allowed = db.Column(db.String(255))
+    income_restricted = db.Column(db.String(255))
     notes = db.Column(db.Text)
     
 # admin view that contains login 
@@ -86,19 +88,17 @@ class SecureModelView(ModelView):
         'notes': CKTextAreaField
     }
 
-#     form_choices = {
-#     'category': [
-#         ('community_ed', 'Community Education'),
-#         ('ems_disaster', 'EMS and Disaster'),
-#         ('tactical_med', 'Tactical Medicine'),
-#         ('wilderness_med', 'Wilderness Medicine')
-#     ], 
-#     'subcategory': [
-#         ('no_subcategory', 'None'),
-#         ('care_other', 'Care of Others'),
-#         ('self_care', 'Self Care')
-#     ]
-#     }
+    form_choices = {
+        'available_flag': [
+            ('yes','Yes'),
+            ('no','No')
+        ],
+        'income_restricted': [
+            ('yes','Yes'),
+            ('no','No')
+        ]
+
+    }
          
 
 # Model View for posts class
@@ -145,7 +145,7 @@ def forms():
 @app.route("/rentals")
 def rentals():
     # List all posts on homepage list
-    listings = Listings.query.order_by(Listings.available_date.desc())
+    listings = Listings.query.order_by(Listings.available_date.asc())
     return render_template("rentals.html", listings=listings)
 
 # Virtual tour page route
@@ -164,7 +164,7 @@ def login():
     if request.method == "POST":
         # Right now, handles only 1 user (admin user)
         # ***** FUTURE ENHANCEMENT - ADD ABILITY FOR MULTIPLE USER SIGNUP *****
-        if request.form.get("username") == postgres_un and request.form.get("password") == postgres_secret_key:
+        if request.form.get("username") == admin_un and request.form.get("password") == admin_pw:
             session['logged_in'] = True
             return redirect("/admin")
         else:
