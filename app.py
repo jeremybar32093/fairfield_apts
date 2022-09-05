@@ -26,8 +26,8 @@ from config import mail_username, mail_password, postgres_secret_key, postgres_u
 app = Flask(__name__)
 
 # ***** CREATE DATABASE FOR STORING RATES/APT TYPES/TENANT INFO/ETC ****+*
-app.config['SQLALCHEMY_DATABASE_URI'] = "postgres://iujsffuonhvyhz:ce70dad91ade8c823e1124820ab3061924686948f85918d1311168e15ac86cf3@ec2-35-168-122-84.compute-1.amazonaws.com:5432/d54e2uu2bmvg8r"
-#app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+
 # Secret Key for being able to post back to database
 app.config["SECRET_KEY"] = postgres_secret_key
 # SMTP Mail Server - outlook
