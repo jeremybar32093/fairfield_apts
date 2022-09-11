@@ -26,9 +26,12 @@ from wtforms.widgets import TextArea
 # Read in environment variables
 admin_pw = os.environ.get("admin_pw")
 admin_un = os.environ.get("admin_un")
-contact_email = os.environ.get("recipient_email")
+recipient_email = os.environ.get("recipient_email")
 mail_username = os.environ.get("mail_username")
-mail_password = os.environ.get("mail_password")
+#mail_password = os.environ.get("mail_password")
+sendgrid_api_key = os.environ.get("sendgrid_api_key")
+#mail_username = 'jeremybar@live.com'
+#mail_password = 'yankeesown'
 
 app = Flask(__name__)
 
@@ -38,12 +41,13 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 # Secret Key for being able to post back to database
 app.config["SECRET_KEY"] = os.environ.get('postgres_secret_key')
 # SMTP Mail Server - outlook
-app.config["MAIL_SERVER"] = "smtp-mail.outlook.com"
+app.config["MAIL_SERVER"] = "smtp.sendgrid.net"
 app.config["MAIL_PORT"] = 587
 app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USE_SSL"] = False
-app.config["MAIL_USERNAME"] = mail_username
-app.config["MAIL_PASSWORD"] = mail_password
+#app.config["MAIL_USE_SSL"] = False
+app.config["MAIL_USERNAME"] = 'apikey'
+app.config["MAIL_PASSWORD"] = sendgrid_api_key
+app.config["MAIL_DEFAULT_SENDER"] = mail_username
 # app.config["MAIL_SUPPRESS_SEND"] = False
 
 # Create db object
@@ -136,7 +140,7 @@ def contact():
         message = request.form.get("message")
         email_body = f"Name: {name}\nE-mail: {email}\nPhone: {phone}\n\n\n{message}"
 
-        msg = Message(subject=f"Mail from {name}", body=email_body, sender=mail_username, recipients=[contact_email])
+        msg = Message(subject=f"Mail from {name}", body=email_body, sender=mail_username, recipients=[recipient_email])
         mail.send(msg)
         print(name)
         return render_template("contact.html", success=True)
