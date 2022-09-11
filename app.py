@@ -18,7 +18,6 @@ from flask_mail import Mail, Message
 # from config import mail_username, mail_password
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
-from config import mail_username, mail_password, postgres_secret_key, postgres_un
 
 #################################################
 # Flask Setup
@@ -28,6 +27,8 @@ from config import mail_username, mail_password, postgres_secret_key, postgres_u
 admin_pw = os.environ.get("admin_pw")
 admin_un = os.environ.get("admin_un")
 contact_email = os.environ.get("recipient_email")
+mail_username = os.environ.get("mail_username")
+mail_password = os.environ.get("mail_password")
 
 app = Flask(__name__)
 
