@@ -18,18 +18,24 @@ from flask_mail import Mail, Message
 # from config import mail_username, mail_password
 from wtforms import TextAreaField
 from wtforms.widgets import TextArea
-from config import mail_username, mail_password, postgres_secret_key, postgres_un, contact_email, admin_un, admin_pw
+from config import mail_username, mail_password, postgres_secret_key, postgres_un
 
 #################################################
 # Flask Setup
 #################################################
+
+# Read in environment variables
+admin_pw = os.environ.get("admin_pw")
+admin_un = os.environ.get("admin_un")
+contact_email = os.environ.get("recipient_email")
+
 app = Flask(__name__)
 
 # ***** CREATE DATABASE FOR STORING RATES/APT TYPES/TENANT INFO/ETC ****+*
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 
 # Secret Key for being able to post back to database
-app.config["SECRET_KEY"] = postgres_secret_key
+app.config["SECRET_KEY"] = os.environ.get('postgres_secret_key')
 # SMTP Mail Server - outlook
 app.config["MAIL_SERVER"] = "smtp-mail.outlook.com"
 app.config["MAIL_PORT"] = 587
