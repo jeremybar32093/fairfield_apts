@@ -36,7 +36,7 @@ sendgrid_api_key = os.environ.get("sendgrid_api_key")
 app = Flask(__name__)
 
 # ***** CREATE DATABASE FOR STORING RATES/APT TYPES/TENANT INFO/ETC ****+*
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL_2')
 
 # Secret Key for being able to post back to database
 app.config["SECRET_KEY"] = os.environ.get('postgres_secret_key')
